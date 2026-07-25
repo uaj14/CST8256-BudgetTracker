@@ -72,23 +72,23 @@ namespace CST8256_BudgetTracker.Controllers
         }
 
         // GET: Allocations/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
+        // public async Task<IActionResult> Details(int? id)
+        // {
+        //     if (id == null)
+        //     {
+        //         return NotFound();
+        //     }
 
-            var allocation = await _context.Allocations
-                .Include(a => a.Category)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (allocation == null)
-            {
-                return NotFound();
-            }
+        //     var allocation = await _context.Allocations
+        //         .Include(a => a.Category)
+        //         .FirstOrDefaultAsync(m => m.Id == id);
+        //     if (allocation == null)
+        //     {
+        //         return NotFound();
+        //     }
 
-            return View(allocation);
-        }
+        //     return View(allocation);
+        // }
 
         // GET: Allocations/Create
         public IActionResult Create()
