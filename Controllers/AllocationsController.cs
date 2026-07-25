@@ -19,9 +19,55 @@ namespace CST8256_BudgetTracker.Controllers
         }
 
         // GET: Allocations
-        public async Task<IActionResult> Index()
+        // Prompted ChatGPT for MVC implementation of toggle-sort functionality.
+        // It recommended using ViewBag and `.AsQueryable()`.
+        public async Task<IActionResult> Index(string sort)
         {
-            var budgetTrackerContext = _context.Allocations.Include(a => a.Category);
+            ViewBag.AllocationAmount_sort = sort == "AllocationAmount" ? "AllocationAmount_desc" : "AllocationAmount";
+            ViewBag.AllocationMonth_sort = sort == "AllocationMonth" ? "AllocationMonth_desc" : "AllocationMonth";
+            ViewBag.CreatedAt_sort = sort == "CreatedAt" ? "CreatedAt_desc" : "CreatedAt";
+            ViewBag.UpdatedAt_sort = sort == "UpdatedAt" ? "UpdatedAt_desc" : "UpdatedAt";
+
+            var budgetTrackerContext = _context.Allocations.Include(a => a.Category).AsQueryable();
+            switch (sort)
+            {
+                case "AllocationAmount":
+                    budgetTrackerContext = budgetTrackerContext
+                        .OrderBy(a => a.AllocationAmount);
+                    break;
+                case "AllocationAmount_desc":
+                    budgetTrackerContext = budgetTrackerContext
+                        .OrderByDescending(a => a.AllocationAmount);
+                    break;
+
+                case "AllocationMonth":
+                    budgetTrackerContext = budgetTrackerContext
+                        .OrderBy(a => a.AllocationMonth);
+                    break;
+                case "AllocationMonth_desc":
+                    budgetTrackerContext = budgetTrackerContext
+                        .OrderByDescending(a => a.AllocationMonth);
+                    break;
+
+                case "CreatedAt":
+                    budgetTrackerContext = budgetTrackerContext
+                        .OrderBy(a => a.CreatedAt);
+                    break;
+                case "CreatedAt_desc":
+                    budgetTrackerContext = budgetTrackerContext
+                        .OrderByDescending(a => a.CreatedAt);
+                    break;
+
+                case "UpdatedAt":
+                    budgetTrackerContext = budgetTrackerContext
+                        .OrderBy(a => a.UpdatedAt);
+                    break;
+                case "UpdatedAt_desc":
+                    budgetTrackerContext = budgetTrackerContext
+                        .OrderByDescending(a => a.UpdatedAt);
+                    break;
+            }
+
             return View(await budgetTrackerContext.ToListAsync());
         }
 

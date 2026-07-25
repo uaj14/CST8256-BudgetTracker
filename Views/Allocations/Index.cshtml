@@ -13,16 +13,17 @@
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.AllocationAmount)
+                @* <a asp-route-sort="AllocationAmount">@Html.DisplayNameFor(model => model.AllocationAmount)</a> *@
+                <a asp-route-sort="@ViewBag.AllocationAmount_sort">@Html.DisplayNameFor(model => model.AllocationAmount)</a>
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.AllocationMonth)
+                <a asp-route-sort="@ViewBag.AllocationMonth_sort">@Html.DisplayNameFor(model => model.AllocationMonth)</a>
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.CreatedAt)
+                <a asp-route-sort="@ViewBag.CreatedAt_sort">@Html.DisplayNameFor(model => model.CreatedAt)</a>
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.UpdatedAt)
+                <a asp-route-sort="@ViewBag.UpdatedAt_sort">@Html.DisplayNameFor(model => model.UpdatedAt)</a>
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.Category)
@@ -50,7 +51,6 @@
             </td>
             <td>
                 <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
                 <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
             </td>
         </tr>

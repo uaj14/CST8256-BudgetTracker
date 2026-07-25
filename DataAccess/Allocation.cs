@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Microsoft.EntityFrameworkCore;
 
 namespace CST8256_BudgetTracker.DataAccess;
 
@@ -18,4 +19,5 @@ public partial class Allocation
     public int CategoryId { get; set; }
 
     public virtual Category Category { get; set; } = null!;
+
 }
