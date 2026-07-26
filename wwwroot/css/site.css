@@ -21,6 +21,46 @@ body {
   margin-bottom: 60px;
 }
 
+.window {
+  padding: 0;
+  background-color: #b3cdf7;
+  border: 3px #1052cc solid; 
+  border-radius: 10px 10px 0 0;
+}
+
+.window h1 {
+  color: white;
+  padding: 0 1rem;
+  background-image: linear-gradient(to bottom, #1052cc, #77A2F5);
+  border-bottom: #1052cc 2px solid;
+}
+
+.window h4 {
+  padding: 0 1rem;
+}
+
+.window p {
+  padding: 0 1rem;
+}
+
+.window form {
+  padding: 0 1rem;
+}
+
+.uitable td {
+  background-color: white;
+}
+
+.uitable a {
+    /* color: black; */
+}
+
+.uitable th {
+  background: linear-gradient(to bottom, #ddecfe, #81a9e2);
+  border-radius: 10px 10px 0 0;
+  box-shadow: 2px 2px 1px #3b619c;
+}
+
 .form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
   color: var(--bs-secondary-color);
   text-align: end;
