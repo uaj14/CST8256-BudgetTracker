@@ -19,30 +19,65 @@ namespace CST8256_BudgetTracker.Controllers
         }
 
         // GET: Transactions
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string sort)
         {
-            var budgetTrackerContext = _context.Transactions.Include(t => t.Category);
+            // var budgetTrackerContext = _context.Transactions.Include(t => t.Category);
+
+            ViewBag.TransactionDate_sort = sort == "TransactionDate" ? "TransactionDate_desc" : "TransactionDate";
+            ViewBag.Description_sort = sort == "Description" ? "Description_desc" : "Description";
+            ViewBag.Amount_sort = sort == "Amount" ? "Amount_desc" : "Amount";
+
+            var budgetTrackerContext = _context.Transactions.Include(t => t.Category).AsQueryable();
+            switch (sort)
+            {
+                case "TransactionDate":
+                    budgetTrackerContext = budgetTrackerContext
+                        .OrderBy(t => t.TransactionDate);
+                    break;
+                case "TransactionDate_desc":
+                    budgetTrackerContext = budgetTrackerContext
+                        .OrderByDescending(t => t.TransactionDate);
+                    break;
+
+                case "Description":
+                    budgetTrackerContext = budgetTrackerContext
+                        .OrderBy(t => t.Description);
+                    break;
+                case "Description_desc":
+                    budgetTrackerContext = budgetTrackerContext
+                        .OrderByDescending(t => t.Description);
+                    break;
+
+                case "Amount":
+                    budgetTrackerContext = budgetTrackerContext
+                        .OrderBy(t => t.Amount);
+                    break;
+                case "Amount_desc":
+                    budgetTrackerContext = budgetTrackerContext
+                        .OrderByDescending(t => t.Amount);
+                    break;
+            }
             return View(await budgetTrackerContext.ToListAsync());
         }
 
         // GET: Transactions/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
+        // public async Task<IActionResult> Details(int? id)
+        // {
+        //     if (id == null)
+        //     {
+        //         return NotFound();
+        //     }
 
-            var transaction = await _context.Transactions
-                .Include(t => t.Category)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (transaction == null)
-            {
-                return NotFound();
-            }
+        //     var transaction = await _context.Transactions
+        //         .Include(t => t.Category)
+        //         .FirstOrDefaultAsync(m => m.Id == id);
+        //     if (transaction == null)
+        //     {
+        //         return NotFound();
+        //     }
 
-            return View(transaction);
-        }
+        //     return View(transaction);
+        // }
 
         // GET: Transactions/Create
         public IActionResult Create()
@@ -122,23 +157,23 @@ namespace CST8256_BudgetTracker.Controllers
         }
 
         // GET: Transactions/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
+        // public async Task<IActionResult> Delete(int? id)
+        // {
+        //     if (id == null)
+        //     {
+        //         return NotFound();
+        //     }
 
-            var transaction = await _context.Transactions
-                .Include(t => t.Category)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (transaction == null)
-            {
-                return NotFound();
-            }
+        //     var transaction = await _context.Transactions
+        //         .Include(t => t.Category)
+        //         .FirstOrDefaultAsync(m => m.Id == id);
+        //     if (transaction == null)
+        //     {
+        //         return NotFound();
+        //     }
 
-            return View(transaction);
-        }
+        //     return View(transaction);
+        // }
 
         // POST: Transactions/Delete/5
         [HttpPost, ActionName("Delete")]
