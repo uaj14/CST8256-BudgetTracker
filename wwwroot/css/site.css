@@ -21,6 +21,31 @@ body {
   margin-bottom: 60px;
 }
 
+#taskbar {
+  color: white;
+  background-image: linear-gradient(to bottom, #1052cc, #77A2F5);
+  padding: 0;
+  border-top: #458ee4 2px solid;
+  border-bottom: #1052cc 2px solid;
+}
+
+#taskbar div {
+  display: flex;
+}
+
+#logo {
+  color: white;
+  font-weight: 700;
+  font-style: italic;
+  background-image: linear-gradient(to bottom, #038b03, #00da00);
+  padding: 0 1rem;
+  border-radius: 0 10px 10px 0;
+  border-top: #7acc7a 2px solid;
+  border-right: #09810b 2px solid;
+  border-bottom: #09810b 2px solid;
+  box-shadow: 2px 0 2px #458ee4;
+}
+
 .window {
   padding: 0;
   background-color: #b3cdf7;
