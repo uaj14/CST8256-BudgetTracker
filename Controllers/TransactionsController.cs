@@ -26,8 +26,8 @@ namespace CST8256_BudgetTracker.Controllers
 
             ViewBag.Date_sort = sort == "Date" ? "Date_desc" : "Date";
             ViewBag.Description_sort = sort == "Description" ? "Description_desc" : "Description";
-            ViewBag.Amount_sort = sort == "Debit" ? "Debit_desc" : "Debit";
-            ViewBag.Amount_sort = sort == "Credit" ? "Credit_desc" : "Credit";
+            ViewBag.Debit_sort = sort == "Debit" ? "Debit_desc" : "Debit";
+            ViewBag.Credit_sort = sort == "Credit" ? "Credit_desc" : "Credit";
 
             // var budgetTrackerContext = _context.Transactions.Include(t => t.Category).AsQueryable();
             var budgetTrackerContext = _context.Transactions
@@ -71,11 +71,11 @@ namespace CST8256_BudgetTracker.Controllers
 
                 case "Credit":
                     budgetTrackerContext = budgetTrackerContext
-                        .OrderBy(t => t.Debit);
+                        .OrderBy(t => t.Credit);
                     break;
                 case "Credit_desc":
                     budgetTrackerContext = budgetTrackerContext
-                        .OrderByDescending(t => t.Debit);
+                        .OrderByDescending(t => t.Credit);
                     break;
             }
             return View(await budgetTrackerContext.ToListAsync());
