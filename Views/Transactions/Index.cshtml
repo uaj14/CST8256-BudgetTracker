@@ -1,5 +1,5 @@
-@model IEnumerable<CST8256_BudgetTracker.DataAccess.Transaction>
-
+@* @model IEnumerable<CST8256_BudgetTracker.DataAccess.Transaction> *@
+@model IEnumerable<CST8256_BudgetTracker.Models.TransactionListItemViewModel>
 @{
     ViewData["Title"] = "Index";
 }
@@ -13,28 +13,42 @@
     <thead>
         <tr>
             <th>
-                <a asp-route-sort="@ViewBag.TransactionDate_sort">@Html.DisplayNameFor(model => model.TransactionDate)</a>
+                @* <a asp-route-sort="@ViewBag.TransactionDate_sort">@Html.DisplayNameFor(model => model.TransactionDate)</a> *@
+                <a asp-route-sort="@ViewBag.Date_sort">@Html.DisplayNameFor(model => model.Date)</a>
             </th>
             <th>
                 <a asp-route-sort="@ViewBag.Description_sort">@Html.DisplayNameFor(model => model.Description)</a>
             </th>
             <th>
-                <a asp-route-sort="@ViewBag.Amount_sort">@Html.DisplayNameFor(model => model.Amount)</a>
+                <a asp-route-sort="@ViewBag.Amount_sort">@Html.DisplayNameFor(model => model.Debit)</a>
             </th>
-            <th></th>
+            <th>
+                <a asp-route-sort="@ViewBag.Amount_sort">@Html.DisplayNameFor(model => model.Credit)</a>
+            </th>
+            <th>Actions</th>
         </tr>
     </thead>
     <tbody>
 @foreach (var item in Model) {
         <tr>
             <td>
-                @Html.DisplayFor(modelItem => item.TransactionDate)
+                @* @Html.DisplayFor(modelItem => item.TransactionDate) *@
+                @Html.DisplayFor(modelItem => item.Date)
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.Description)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.Amount)
+                @if (item.Debit != 0) // Suggested by AI: Using if statement to show blank items for 0 values.
+                {
+                    @Html.DisplayFor(modelItem => item.Debit)
+                }
+            </td>
+            <td>
+                @if (item.Credit != 0)
+                {
+                    @Html.DisplayFor(modelItem => item.Credit)
+                }
             </td>
             <td class="d-flex">
                 <a asp-action="Edit" asp-route-id="@item.Id" class="me-1"><img src="~/icons/xp edit.ico" alt="Edit"></a> 

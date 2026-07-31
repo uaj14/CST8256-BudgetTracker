@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using CST8256_BudgetTracker.DataAccess;
+using CST8256_BudgetTracker.Models;
 
 namespace CST8256_BudgetTracker.Controllers
 {
@@ -23,20 +24,31 @@ namespace CST8256_BudgetTracker.Controllers
         {
             // var budgetTrackerContext = _context.Transactions.Include(t => t.Category);
 
-            ViewBag.TransactionDate_sort = sort == "TransactionDate" ? "TransactionDate_desc" : "TransactionDate";
+            ViewBag.Date_sort = sort == "Date" ? "Date_desc" : "Date";
             ViewBag.Description_sort = sort == "Description" ? "Description_desc" : "Description";
-            ViewBag.Amount_sort = sort == "Amount" ? "Amount_desc" : "Amount";
+            ViewBag.Amount_sort = sort == "Debit" ? "Debit_desc" : "Debit";
+            ViewBag.Amount_sort = sort == "Credit" ? "Credit_desc" : "Credit";
 
-            var budgetTrackerContext = _context.Transactions.Include(t => t.Category).AsQueryable();
+            // var budgetTrackerContext = _context.Transactions.Include(t => t.Category).AsQueryable();
+            var budgetTrackerContext = _context.Transactions
+                .Include(t => t.Category)
+                .Select(t => new TransactionListItemViewModel
+                {
+                    Date = t.TransactionDate,
+                    Debit = t.TransactionType == "Income" ? t.Amount : 0,
+                    Credit = t.TransactionType == "Expense" ? t.Amount : 0,
+                    Description = t.Description
+                })
+                .AsQueryable();
             switch (sort)
             {
-                case "TransactionDate":
+                case "Date":
                     budgetTrackerContext = budgetTrackerContext
-                        .OrderBy(t => t.TransactionDate);
+                        .OrderBy(t => t.Date);
                     break;
-                case "TransactionDate_desc":
+                case "Date_desc":
                     budgetTrackerContext = budgetTrackerContext
-                        .OrderByDescending(t => t.TransactionDate);
+                        .OrderByDescending(t => t.Date);
                     break;
 
                 case "Description":
@@ -48,13 +60,22 @@ namespace CST8256_BudgetTracker.Controllers
                         .OrderByDescending(t => t.Description);
                     break;
 
-                case "Amount":
+                case "Debit":
                     budgetTrackerContext = budgetTrackerContext
-                        .OrderBy(t => t.Amount);
+                        .OrderBy(t => t.Debit);
                     break;
-                case "Amount_desc":
+                case "Debit_desc":
                     budgetTrackerContext = budgetTrackerContext
-                        .OrderByDescending(t => t.Amount);
+                        .OrderByDescending(t => t.Debit);
+                    break;
+
+                case "Credit":
+                    budgetTrackerContext = budgetTrackerContext
+                        .OrderBy(t => t.Debit);
+                    break;
+                case "Credit_desc":
+                    budgetTrackerContext = budgetTrackerContext
+                        .OrderByDescending(t => t.Debit);
                     break;
             }
             return View(await budgetTrackerContext.ToListAsync());
