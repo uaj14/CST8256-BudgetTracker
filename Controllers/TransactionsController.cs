@@ -35,8 +35,8 @@ namespace CST8256_BudgetTracker.Controllers
                 .Select(t => new TransactionListItemViewModel
                 {
                     Date = t.TransactionDate,
-                    Debit = t.TransactionType == "Income" ? t.Amount : 0,
-                    Credit = t.TransactionType == "Expense" ? t.Amount : 0,
+                    Debit = t.TransactionType == "Income" ? t.Amount : null,
+                    Credit = t.TransactionType == "Expense" ? t.Amount : null,
                     Description = t.Description
                 })
                 .AsQueryable();
@@ -62,7 +62,8 @@ namespace CST8256_BudgetTracker.Controllers
 
                 case "Debit":
                     budgetTrackerContext = budgetTrackerContext
-                        .OrderBy(t => t.Debit);
+                        .OrderBy(t => t.Debit==null)
+                        .ThenBy(t => t.Debit);
                     break;
                 case "Debit_desc":
                     budgetTrackerContext = budgetTrackerContext
@@ -71,7 +72,8 @@ namespace CST8256_BudgetTracker.Controllers
 
                 case "Credit":
                     budgetTrackerContext = budgetTrackerContext
-                        .OrderBy(t => t.Credit);
+                        .OrderBy(t => t.Credit==null)
+                        .ThenBy(t => t.Credit);
                     break;
                 case "Credit_desc":
                     budgetTrackerContext = budgetTrackerContext

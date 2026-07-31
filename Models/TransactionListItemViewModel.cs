@@ -3,9 +3,9 @@ namespace CST8256_BudgetTracker.Models;
 public class TransactionListItemViewModel
 {
     public int Id { get; set; }
-    public double Debit { get; set; }
+    public double? Debit { get; set; }
 
-    public double Credit { get; set; }
+    public double? Credit { get; set; }
 
     public DateOnly Date { get; set; }
 
