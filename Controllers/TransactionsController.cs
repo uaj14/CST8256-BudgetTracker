@@ -35,10 +35,10 @@ namespace CST8256_BudgetTracker.Controllers
                 .Include(t => t.Category)
                 .Select(t => new TransactionListItemViewModel
                 {
-                    // Id = t.Id,
+                    Id = t.Id,
                     Date = t.TransactionDate,
-                    Debit = t.TransactionType == "Income" ? t.Amount : null,
-                    Credit = t.TransactionType == "Expense" ? t.Amount : null,
+                    Debit = t.TransactionType == "Expense" ? t.Amount : null,
+                    Credit = t.TransactionType == "Income" ? t.Amount : null,
                     Description = t.Description
                 })
                 .AsQueryable();
