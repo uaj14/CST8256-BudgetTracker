@@ -110,8 +110,7 @@ namespace CST8256_BudgetTracker.Controllers
         {
             //ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Id");
             
-            // The purpose of the code within the curly braces is to have
-            // prepopulated values.
+            // The purpose of the code within the curly braces is to have prepopulated values.
             var model = new TransactionCreateViewModel {
                 Date = DateOnly.FromDateTime(DateTime.Today), // AI: Found way to prepopulate field with current date.
                 TransactionTypeOptions = GetTransactionTypesOptions(),
@@ -172,7 +171,21 @@ namespace CST8256_BudgetTracker.Controllers
             {
                 return NotFound();
             }
-            ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Id", transaction.CategoryId);
+            // ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Id", transaction.CategoryId);
+            
+            // The purpose of the code within the curly braces is to have prepopulated values.
+            var model = new TransactionCreateViewModel {
+                Id = transaction.Id,
+                Amount = transaction.Amount,
+                Date = transaction.TransactionDate, // AI: Found way to prepopulate field with current date.
+                TransactionType = transaction.TransactionType,
+                CategoryId = transaction.CategoryId,
+                Description = transaction.Description,
+                TransactionTypeOptions = GetTransactionTypesOptions(),
+                CategoryOptions = GetCategoriesOptions()
+            };
+            
+            return View(model);
             return View(transaction);
         }
 
