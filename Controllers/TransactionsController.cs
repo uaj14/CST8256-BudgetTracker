@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using CST8256_BudgetTracker.DataAccess;
 using CST8256_BudgetTracker.Models;
+using NuGet.Protocol;
 
 namespace CST8256_BudgetTracker.Controllers
 {
@@ -22,7 +23,7 @@ namespace CST8256_BudgetTracker.Controllers
         // GET: Transactions
         public async Task<IActionResult> Index(string sort)
         {
-            // var budgetTrackerContext = _context.Transactions.Include(t => t.Category);
+            var budgetTrackerContext = _context.Transactions.Include(t => t.Category);
 
             ViewBag.Date_sort = sort == "Date" ? "Date_desc" : "Date";
             ViewBag.Description_sort = sort == "Description" ? "Description_desc" : "Description";
@@ -30,10 +31,11 @@ namespace CST8256_BudgetTracker.Controllers
             ViewBag.Credit_sort = sort == "Credit" ? "Credit_desc" : "Credit";
 
             // var budgetTrackerContext = _context.Transactions.Include(t => t.Category).AsQueryable();
-            var budgetTrackerContext = _context.Transactions
+            var budgetTrackerModel = _context.Transactions
                 .Include(t => t.Category)
                 .Select(t => new TransactionListItemViewModel
                 {
+                    // Id = t.Id,
                     Date = t.TransactionDate,
                     Debit = t.TransactionType == "Income" ? t.Amount : null,
                     Credit = t.TransactionType == "Expense" ? t.Amount : null,
@@ -43,44 +45,45 @@ namespace CST8256_BudgetTracker.Controllers
             switch (sort)
             {
                 case "Date":
-                    budgetTrackerContext = budgetTrackerContext
+                    budgetTrackerModel = budgetTrackerModel
                         .OrderBy(t => t.Date);
                     break;
                 case "Date_desc":
-                    budgetTrackerContext = budgetTrackerContext
+                    budgetTrackerModel = budgetTrackerModel
                         .OrderByDescending(t => t.Date);
                     break;
 
                 case "Description":
-                    budgetTrackerContext = budgetTrackerContext
+                    budgetTrackerModel = budgetTrackerModel
                         .OrderBy(t => t.Description);
                     break;
                 case "Description_desc":
-                    budgetTrackerContext = budgetTrackerContext
+                    budgetTrackerModel = budgetTrackerModel
                         .OrderByDescending(t => t.Description);
                     break;
 
                 case "Debit":
-                    budgetTrackerContext = budgetTrackerContext
+                    budgetTrackerModel = budgetTrackerModel
                         .OrderBy(t => t.Debit==null)
                         .ThenBy(t => t.Debit);
                     break;
                 case "Debit_desc":
-                    budgetTrackerContext = budgetTrackerContext
+                    budgetTrackerModel = budgetTrackerModel
                         .OrderByDescending(t => t.Debit);
                     break;
 
                 case "Credit":
-                    budgetTrackerContext = budgetTrackerContext
+                    budgetTrackerModel = budgetTrackerModel
                         .OrderBy(t => t.Credit==null)
                         .ThenBy(t => t.Credit);
                     break;
                 case "Credit_desc":
-                    budgetTrackerContext = budgetTrackerContext
+                    budgetTrackerModel = budgetTrackerModel
                         .OrderByDescending(t => t.Credit);
                     break;
             }
-            return View(await budgetTrackerContext.ToListAsync());
+            return View(budgetTrackerModel);
+            //return View(await budgetTrackerContext.ToListAsync());
         }
 
         // GET: Transactions/Details/5
@@ -105,8 +108,17 @@ namespace CST8256_BudgetTracker.Controllers
         // GET: Transactions/Create
         public IActionResult Create()
         {
-            ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Id");
-            return View();
+            //ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Id");
+            
+            // The purpose of the code within the curly braces is to have
+            // prepopulated values.
+            var model = new TransactionCreateViewModel {
+                Date = DateOnly.FromDateTime(DateTime.Today), // AI: Found way to prepopulate field with current date.
+                TransactionTypeOptions = GetTransactionTypesOptions(),
+                CategoryOptions = GetCategoriesOptions()
+            };
+            
+            return View(model);
         }
 
         // POST: Transactions/Create
@@ -114,16 +126,37 @@ namespace CST8256_BudgetTracker.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Amount,TransactionDate,TransactionType,CreatedAt,UpdatedAt,CategoryId,Description")] Transaction transaction)
+        // public async Task<IActionResult> Create([Bind("Id,Amount,TransactionDate,TransactionType,CreatedAt,UpdatedAt,CategoryId,Description")] Transaction transaction)
+        public async Task<IActionResult> Create(TransactionCreateViewModel model)
         {
             if (ModelState.IsValid)
             {
+                // Process the form. Convert from the VM to Transaction proper.
+                var transaction = new Transaction
+                {
+                    // Id = 1,
+                    Amount = (double)model.Amount,
+                    TransactionDate = model.Date,
+                    TransactionType = model.TransactionType,
+                    Description = model.Description,
+                    CategoryId = model.CategoryId,
+                    CreatedAt = DateTime.UtcNow.ToString(),
+                    UpdatedAt = DateTime.UtcNow.ToString()
+                };
+
                 _context.Add(transaction);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Id", transaction.CategoryId);
-            return View(transaction);
+
+            // Invalid data
+            // Repopulate the DDLs
+            model.TransactionTypeOptions = GetTransactionTypesOptions();
+            model.CategoryOptions = GetCategoriesOptions();
+            return View(model);
+
+            // ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Id", transaction.CategoryId);
+            // return View(transaction);
         }
 
         // GET: Transactions/Edit/5
@@ -217,5 +250,21 @@ namespace CST8256_BudgetTracker.Controllers
         {
             return _context.Transactions.Any(e => e.Id == id);
         }
+
+        // Create select lists for transactions.
+        private List<SelectListItem> GetTransactionTypesOptions() {
+            return new List<SelectListItem> { // Asked AI on how to quickly hardcode a new SelectListItem.
+                    new SelectListItem { Text = "Expense", Value = "Expense" },
+                    new SelectListItem { Text = "Income", Value = "Income" }
+                };
+        }
+        private List<SelectListItem> GetCategoriesOptions() {
+            return _context.Categories
+                    .Select(c => new SelectListItem {
+                        Value = c.Id.ToString(),
+                        Text = c.Name
+                    }).ToList();
+        }
+
     }
 }
