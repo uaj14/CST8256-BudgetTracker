@@ -194,23 +194,33 @@ namespace CST8256_BudgetTracker.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Amount,TransactionDate,TransactionType,CreatedAt,UpdatedAt,CategoryId,Description")] Transaction transaction)
+        //public async Task<IActionResult> Edit(int id, [Bind("Id,Amount,TransactionDate,TransactionType,CreatedAt,UpdatedAt,CategoryId,Description")] Transaction transaction)
+        public async Task<IActionResult> Edit(int id, TransactionCreateViewModel model)
         {
-            if (id != transaction.Id)
+            if (id != model.Id)
             {
                 return NotFound();
             }
+
+             // AI: Process of updating an existing transaction
+             // Load entity from database
+            var transaction = await _context.Transactions.FindAsync(id);
 
             if (ModelState.IsValid)
             {
                 try
                 {
-                    _context.Update(transaction);
+                    // AI: Copy values from the view model
+                    transaction.Amount = (double)model.Amount;
+                    transaction.TransactionDate = model.Date;
+                    transaction.CategoryId = model.CategoryId;
+                    transaction.Description = model.Description;
+                    // _context.Update(model);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!TransactionExists(transaction.Id))
+                    if (!TransactionExists(model.Id))
                     {
                         return NotFound();
                     }
@@ -221,8 +231,13 @@ namespace CST8256_BudgetTracker.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Id", transaction.CategoryId);
-            return View(transaction);
+            // Invalid data
+            // Repopulate the DDLs
+            model.TransactionTypeOptions = GetTransactionTypesOptions();
+            model.CategoryOptions = GetCategoriesOptions();
+            return View(model);
+            //ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Id", transaction.CategoryId);
+            //return View(transaction);
         }
 
         // GET: Transactions/Delete/5
