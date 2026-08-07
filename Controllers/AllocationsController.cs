@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using CST8256_BudgetTracker.DataAccess;
+using CST8256_BudgetTracker.Models;
+using Microsoft.IdentityModel.Tokens;
 
 namespace CST8256_BudgetTracker.Controllers
 {
@@ -21,54 +23,114 @@ namespace CST8256_BudgetTracker.Controllers
         // GET: Allocations
         // Prompted ChatGPT for MVC implementation of toggle-sort functionality.
         // It recommended using ViewBag and `.AsQueryable()`.
-        public async Task<IActionResult> Index(string sort)
+        public async Task<IActionResult> Index(string sort, string? SelectedAllocationMonth)
         {
+            var allocationsContext = _context.Allocations.Include(a => a.Category).AsQueryable();
+
+            // Prompted ChatGPT to create DDL items for available months from the DB
+            var allocationsModel = new AllocationIndexViewModel();
+
+            allocationsModel.AllocationMonthOptions = _context.Allocations
+                .Select(a => new
+                {
+                    Year = a.AllocationMonth.Year,
+                    Month = a.AllocationMonth.Month
+                })
+                .Distinct()
+                .OrderByDescending(x => x.Year)
+                .ThenByDescending(x => x.Month)
+                .AsEnumerable()
+                .Select(x => new SelectListItem
+                {
+                    Value = $"{x.Year}-{x.Month:D2}",
+                    Text = new DateTime(x.Year, x.Month, 1)
+                        .ToString("MMMM yyyy")
+                })
+                .ToList();
+
+            // Default option
+            allocationsModel.AllocationMonthOptions.Insert(0, new SelectListItem
+                {
+                    Value = "",
+                    Text = "-- All Months --"
+                });
+
+            // Search by month and year
+            // if (searchYear.HasValue && searchMonth.HasValue)
+            // {
+            //     allocationsContext = allocationsContext.Where(t => 
+            //     t.AllocationMonth.Month == searchMonth.Value &&
+            //     t.AllocationMonth.Year == searchYear.Value);
+            // }
+
+            // Parse selected month and year.
+            // int? searchYear;
+            // int? searchMonth;
+
+            if (!string.IsNullOrEmpty(SelectedAllocationMonth))
+            {
+                var parts = SelectedAllocationMonth.Split('-');
+
+                int searchYear = int.Parse(parts[0]);
+                int searchMonth = int.Parse(parts[1]);
+
+                allocationsContext = allocationsContext
+                    .Where(a =>
+                        a.AllocationMonth.Year == searchYear &&
+                        a.AllocationMonth.Month == searchMonth);
+            }
+
+            // ViewBag.Year = searchYear;
+            // ViewBag.Month = searchMonth;
+
             ViewBag.AllocationAmount_sort = sort == "AllocationAmount" ? "AllocationAmount_desc" : "AllocationAmount";
             ViewBag.AllocationMonth_sort = sort == "AllocationMonth" ? "AllocationMonth_desc" : "AllocationMonth";
             ViewBag.CreatedAt_sort = sort == "CreatedAt" ? "CreatedAt_desc" : "CreatedAt";
             ViewBag.UpdatedAt_sort = sort == "UpdatedAt" ? "UpdatedAt_desc" : "UpdatedAt";
 
-            var budgetTrackerContext = _context.Allocations.Include(a => a.Category).AsQueryable();
+            // Sort
             switch (sort)
             {
                 case "AllocationAmount":
-                    budgetTrackerContext = budgetTrackerContext
+                    allocationsContext = allocationsContext
                         .OrderBy(a => a.AllocationAmount);
                     break;
                 case "AllocationAmount_desc":
-                    budgetTrackerContext = budgetTrackerContext
+                    allocationsContext = allocationsContext
                         .OrderByDescending(a => a.AllocationAmount);
                     break;
 
                 case "AllocationMonth":
-                    budgetTrackerContext = budgetTrackerContext
+                    allocationsContext = allocationsContext
                         .OrderBy(a => a.AllocationMonth);
                     break;
                 case "AllocationMonth_desc":
-                    budgetTrackerContext = budgetTrackerContext
+                    allocationsContext = allocationsContext
                         .OrderByDescending(a => a.AllocationMonth);
                     break;
 
                 case "CreatedAt":
-                    budgetTrackerContext = budgetTrackerContext
+                    allocationsContext = allocationsContext
                         .OrderBy(a => a.CreatedAt);
                     break;
                 case "CreatedAt_desc":
-                    budgetTrackerContext = budgetTrackerContext
+                    allocationsContext = allocationsContext
                         .OrderByDescending(a => a.CreatedAt);
                     break;
 
                 case "UpdatedAt":
-                    budgetTrackerContext = budgetTrackerContext
+                    allocationsContext = allocationsContext
                         .OrderBy(a => a.UpdatedAt);
                     break;
                 case "UpdatedAt_desc":
-                    budgetTrackerContext = budgetTrackerContext
+                    allocationsContext = allocationsContext
                         .OrderByDescending(a => a.UpdatedAt);
                     break;
             }
 
-            return View(await budgetTrackerContext.ToListAsync());
+            allocationsModel.Allocations = await allocationsContext.ToListAsync();
+            // return View(await allocationsContext.ToListAsync());
+            return View(allocationsModel);
         }
 
         // GET: Allocations/Details/5

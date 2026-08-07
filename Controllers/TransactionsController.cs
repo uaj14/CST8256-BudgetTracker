@@ -21,16 +21,9 @@ namespace CST8256_BudgetTracker.Controllers
         }
 
         // GET: Transactions
-        public async Task<IActionResult> Index(string sort)
+        public async Task<IActionResult> Index(string sort, string? search, int page = 1)
         {
-            var budgetTrackerContext = _context.Transactions.Include(t => t.Category);
-
-            ViewBag.Date_sort = sort == "Date" ? "Date_desc" : "Date";
-            ViewBag.Description_sort = sort == "Description" ? "Description_desc" : "Description";
-            ViewBag.Debit_sort = sort == "Debit" ? "Debit_desc" : "Debit";
-            ViewBag.Credit_sort = sort == "Credit" ? "Credit_desc" : "Credit";
-
-            // var budgetTrackerContext = _context.Transactions.Include(t => t.Category).AsQueryable();
+            var budgetTrackerContext = _context.Transactions.Include(t => t.Category).AsQueryable();
             var budgetTrackerModel = _context.Transactions
                 .Include(t => t.Category)
                 .Select(t => new TransactionListItemViewModel
@@ -42,6 +35,25 @@ namespace CST8256_BudgetTracker.Controllers
                     Description = t.Description
                 })
                 .AsQueryable();
+
+            // Search by Description and Category
+            // var budgetTrackerContext = _context.Transactions.Include(t => t.Category).AsQueryable();
+            if (!string.IsNullOrEmpty(search))
+            {
+                budgetTrackerModel = budgetTrackerModel.Where(t =>
+                    t.Description.ToLower().Contains(search.ToLower()));
+                    // t.Category.Name.ToLower().Contains(search.ToLower()));   // Is Category necessary?
+                ViewBag.Search = search;
+            }
+
+            // Sort
+            // var budgetTrackerContext = _context.Transactions.Include(t => t.Category);
+            ViewBag.Current_sort = sort;
+            ViewBag.Date_sort = sort == "Date" ? "Date_desc" : "Date";
+            ViewBag.Description_sort = sort == "Description" ? "Description_desc" : "Description";
+            ViewBag.Debit_sort = sort == "Debit" ? "Debit_desc" : "Debit";
+            ViewBag.Credit_sort = sort == "Credit" ? "Credit_desc" : "Credit";
+
             switch (sort)
             {
                 case "Date":
@@ -82,6 +94,27 @@ namespace CST8256_BudgetTracker.Controllers
                         .OrderByDescending(t => t.Credit);
                     break;
             }
+
+            // Pagination
+            const int pageSize = 20;
+            int pageNumber = page < 1 ? 1 : page;
+
+            // Calculating Total Pages
+            var totalCount = await budgetTrackerModel.CountAsync();
+            var totalPages = Math.Max(1, (int)Math.Ceiling(totalCount / (double)pageSize));
+
+            // Prevent going beyond total pages
+            pageNumber = pageNumber > totalPages ? totalPages : pageNumber;
+
+            budgetTrackerModel = budgetTrackerModel
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize);
+
+            ViewBag.CurrentPage = pageNumber;
+            ViewBag.HasPrevPage = pageNumber > 1;
+            ViewBag.HasNextPage = pageNumber < totalPages;
+
+
             return View(budgetTrackerModel);
             //return View(await budgetTrackerContext.ToListAsync());
         }

@@ -9,6 +9,12 @@
 <p>
     <a asp-action="Create"><img src="~/icons/Notebook.ico" width="32" height="32" alt="Create New"></a>
 </p>
+    <form
+        asp-route-search="@ViewBag.Search"
+        asp-route-sort="@ViewBag.Current_sort">
+        <input type="search" name="search" class="form-control mb-3" placeholder="Search..."
+            value="@ViewBag.Search" />
+    </form>
 <table class="table uitable">
     <thead>
         <tr>
@@ -17,16 +23,20 @@
             </th> *@
             <th>
                 @* <a asp-route-sort="@ViewBag.TransactionDate_sort">@Html.DisplayNameFor(model => model.TransactionDate)</a> *@
-                <a asp-route-sort="@ViewBag.Date_sort">@Html.DisplayNameFor(model => model.Date)</a>
+                <a asp-route-sort="@ViewBag.Date_sort"
+                asp-route-search="@ViewBag.Search">@Html.DisplayNameFor(model => model.Date)</a>
             </th>
             <th>
-                <a asp-route-sort="@ViewBag.Description_sort">@Html.DisplayNameFor(model => model.Description)</a>
+                <a asp-route-sort="@ViewBag.Description_sort"
+                asp-route-search="@ViewBag.Search">@Html.DisplayNameFor(model => model.Description)</a>
             </th>
             <th>
-                <a asp-route-sort="@ViewBag.Debit_sort">@Html.DisplayNameFor(model => model.Debit)</a>
+                <a asp-route-sort="@ViewBag.Debit_sort"
+                asp-route-search="@ViewBag.Search">@Html.DisplayNameFor(model => model.Debit)</a>
             </th>
             <th>
-                <a asp-route-sort="@ViewBag.Credit_sort">@Html.DisplayNameFor(model => model.Credit)</a>
+                <a asp-route-sort="@ViewBag.Credit_sort"
+                asp-route-search="@ViewBag.Search">@Html.DisplayNameFor(model => model.Credit)</a>
             </th>
             <th>Actions</th>
         </tr>
@@ -68,3 +78,21 @@
 }
     </tbody>
 </table>
+<nav aria-label="Books pagination" class="d-flex justify-content-end">
+    <ul class="pagination">
+        <li class="page-item">
+            <a class="page-link @(!(bool)ViewBag.HasPrevPage ? "disabled" : "")"
+                asp-action="Index"
+                asp-route-page="@((int)ViewBag.CurrentPage - 1)"
+                asp-route-sort="@ViewBag.Current_sort"
+                asp-route-search="@ViewBag.Search">Prev</a>
+        </li>
+        <li class="page-item">
+            <a class="page-link @(!(bool)ViewBag.HasNextPage ? "disabled" : "")"
+                asp-action="Index"
+                asp-route-page="@((int)ViewBag.CurrentPage + 1)"
+                asp-route-sort="@ViewBag.Current_sort"
+                asp-route-search="@ViewBag.Search">Next</a>
+        </li>
+    </ul>
+</nav>
