@@ -155,8 +155,14 @@ namespace CST8256_BudgetTracker.Controllers
         // GET: Allocations/Create
         public IActionResult Create()
         {
-            ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Id");
-            return View();
+            // ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Id");
+            // return View();
+            // The purpose of the code within the curly braces is to have prepopulated values.
+            var model = new AllocationCreateViewModel {
+                CategoryOptions = GetCategoriesOptions()
+            };
+            
+            return View(model);
         }
 
         // POST: Allocations/Create
@@ -164,16 +170,46 @@ namespace CST8256_BudgetTracker.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,AllocationAmount,AllocationMonth,CreatedAt,UpdatedAt,CategoryId")] Allocation allocation)
+        // public async Task<IActionResult> Create([Bind("Id,AllocationAmount,AllocationMonth,CreatedAt,UpdatedAt,CategoryId")] Allocation allocation)
+        public async Task<IActionResult> Create(AllocationCreateViewModel model)
         {
-            if (ModelState.IsValid)
-            {
-                _context.Add(allocation);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+            // if (ModelState.IsValid)
+            // {
+            //     _context.Add(allocation);
+            //     await _context.SaveChangesAsync();
+            //     return RedirectToAction(nameof(Index));
+            // }
+            // ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Id", allocation.CategoryId);
+            // return View(allocation);
+
+            // Create new allocation iff there is no existing allocation for the current month.
+            DateOnly currentMonth = new DateOnly(DateTime.Today.Year, DateTime.Today.Month, 1);
+            var potential_record = await _context.Allocations
+                .FirstOrDefaultAsync(a => a.CategoryId == model.CategoryId && a.AllocationMonth == currentMonth);
+
+            if (potential_record == null) {
+                if (ModelState.IsValid)
+                {
+                    // Process the form. Convert from the VM to Allocation proper.
+                    var allocation = new Allocation
+                    {
+                        // Id = 1,
+                        AllocationAmount = (double)model.Amount,
+                        AllocationMonth = currentMonth,
+                        CategoryId = model.CategoryId,
+                        CreatedAt = DateTime.UtcNow.ToString(),
+                        UpdatedAt = DateTime.UtcNow.ToString()
+                    };
+
+                    _context.Allocations.Add(allocation);
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(Index));
+                }
             }
-            ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Id", allocation.CategoryId);
-            return View(allocation);
+            // Invalid data
+            // Repopulate the DDLs
+            model.CategoryOptions = GetCategoriesOptions();
+            return View(model);
         }
 
         // GET: Allocations/Edit/5
@@ -266,6 +302,14 @@ namespace CST8256_BudgetTracker.Controllers
         private bool AllocationExists(int id)
         {
             return _context.Allocations.Any(e => e.Id == id);
+        }
+
+        private List<SelectListItem> GetCategoriesOptions() {
+            return _context.Categories
+                    .Select(c => new SelectListItem {
+                        Value = c.Id.ToString(),
+                        Text = c.Name
+                    }).ToList();
         }
     }
 }
