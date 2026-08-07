@@ -5,6 +5,7 @@ namespace CST8256_BudgetTracker.Models;
 
 public class AllocationCreateViewModel
 {
+    public int Id { get; set; }
     public List<SelectListItem> CategoryOptions { get; set; } = new();
 
     public int CategoryId { get; set; }

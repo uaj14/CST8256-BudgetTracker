@@ -235,8 +235,8 @@ namespace CST8256_BudgetTracker.Controllers
                 return NotFound();
             }
 
-             // AI: Process of updating an existing transaction
-             // Load entity from database
+            // AI: Process of updating an existing transaction
+            // Load entity from database
             var transaction = await _context.Transactions.FindAsync(id);
 
             if (ModelState.IsValid)

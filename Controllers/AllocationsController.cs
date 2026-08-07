@@ -182,6 +182,8 @@ namespace CST8256_BudgetTracker.Controllers
             // ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Id", allocation.CategoryId);
             // return View(allocation);
 
+            ViewBag.ErrorMessage = "";
+
             // Create new allocation iff there is no existing allocation for the current month.
             DateOnly currentMonth = new DateOnly(DateTime.Today.Year, DateTime.Today.Month, 1);
             var potential_record = await _context.Allocations
@@ -207,6 +209,7 @@ namespace CST8256_BudgetTracker.Controllers
                 }
             }
             // Invalid data
+            ViewBag.ErrorMessage = "This allocation already exists for this month.";
             // Repopulate the DDLs
             model.CategoryOptions = GetCategoriesOptions();
             return View(model);
@@ -215,6 +218,8 @@ namespace CST8256_BudgetTracker.Controllers
         // GET: Allocations/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
+            ViewBag.MonthErrorMessage = "";
+
             if (id == null)
             {
                 return NotFound();
@@ -225,8 +230,25 @@ namespace CST8256_BudgetTracker.Controllers
             {
                 return NotFound();
             }
-            ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Id", allocation.CategoryId);
-            return View(allocation);
+
+            if (allocation.AllocationMonth == new DateOnly(DateTime.Today.Year, DateTime.Today.Month, 1))
+            {
+                // The purpose of the code within the curly braces is to have prepopulated values.
+                var model = new AllocationCreateViewModel {
+                    Id = allocation.Id,
+                    Amount = allocation.AllocationAmount,
+                    CategoryId = allocation.CategoryId,
+                    CategoryOptions = GetCategoriesOptions()
+                };
+                return View(model);
+            } else {
+                ViewBag.MonthErrorMessage = "Cannot edit allocations from previous months.";
+            }
+            
+            return View();
+
+            // ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Id", allocation.CategoryId);
+            // return View(allocation);
         }
 
         // POST: Allocations/Edit/5
@@ -234,23 +256,36 @@ namespace CST8256_BudgetTracker.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,AllocationAmount,AllocationMonth,CreatedAt,UpdatedAt,CategoryId")] Allocation allocation)
+        // public async Task<IActionResult> Edit(int id, [Bind("Id,AllocationAmount,AllocationMonth,CreatedAt,UpdatedAt,CategoryId")] Allocation allocation)
+        public async Task<IActionResult> Edit(int id, AllocationCreateViewModel model)
         {
-            if (id != allocation.Id)
+            if (id != model.Id)
             {
                 return NotFound();
             }
+
+            // AI: Process of updating an existing transaction
+            // Load entity from database
+            var allocation = await _context.Allocations.FindAsync(id);
 
             if (ModelState.IsValid)
             {
                 try
                 {
-                    _context.Update(allocation);
+                // Can only edit allocations for the current month
+                if (allocation.AllocationMonth == new DateOnly(DateTime.Today.Year, DateTime.Today.Month, 1))
+                {
+                                        // AI: Copy values from the view model
+                    allocation.AllocationAmount = (double)model.Amount;
+                    allocation.CategoryId = model.CategoryId;
+                    // _context.Update(allocation);
                     await _context.SaveChangesAsync();
+                }
+
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!AllocationExists(allocation.Id))
+                    if (!AllocationExists(model.Id))
                     {
                         return NotFound();
                     }
@@ -261,8 +296,10 @@ namespace CST8256_BudgetTracker.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Id", allocation.CategoryId);
-            return View(allocation);
+            model.CategoryOptions = GetCategoriesOptions();
+            return View(model);
+            // ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Id", allocation.CategoryId);
+            // return View(allocation);
         }
 
         // GET: Allocations/Delete/5
