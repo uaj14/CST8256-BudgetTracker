@@ -1,8 +1,125 @@
-﻿@{
+﻿@* Prompted ChatGPT for a way to convert number to month. *@
+@using System.Globalization;
+@model CST8256_BudgetTracker.Models.DashboardViewModel
+@{
     ViewData["Title"] = "Home Page";
 }
-
+<form asp-action="Index" method="get">
+    <div class="form-group">
+        <label asp-for="SelectedMonth" class="control-label"></label>
+        <select asp-for="SelectedMonth" 
+            class ="form-select" 
+            asp-items="@Model.AllocationVM.AllocationMonthOptions"
+            onchange="this.form.submit()">
+        </select>
+        <span asp-validation-for="SelectedMonth" class="text-danger"></span>
+    </div>
+</form>
 <div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+    <h1 class="display-4">Dashboard</h1>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6">
+                <!-- Top left -->
+                <h2>Income for @CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(ViewBag.searchMonth) @ViewBag.searchYear</h2>
+                <p>@ViewBag.SelectedMonthIncome.ToString("C")</p>
+            </div>
+
+            <div class="col-md-6">
+                <!-- Top right -->
+                <h2>Expenses for @CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(ViewBag.searchMonth) @ViewBag.searchYear</h2>
+                <p>@ViewBag.SelectedMonthExpense.ToString("C")</p>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <!-- Bottom left -->
+                <h2>Recent Transactions</h2>
+                <table class="table uitable">
+                    <thead>
+                        <tr>
+                            <th>
+                                Date
+                            </th>
+                            <th>
+                                Description
+                            </th>
+                            <th>
+                                Amount
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.Transactions) {
+                            <tr>
+                                @* <td>
+                                    @Html.DisplayFor(modelItem => item.Id)
+                                </td> *@
+                                <td>
+                                    @* @Html.DisplayFor(modelItem => item.TransactionDate) *@
+                                    @Html.DisplayFor(modelItem => item.TransactionDate)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Description)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Amount)
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                    </table>
+                </div>
+
+            <div class="col-md-6">
+                <!-- Bottom right -->
+                <h2>Remaining Allocations</h2>
+                <table class="table uitable">
+                    <thead>
+                        <tr>
+                            <th>
+                                Category
+                            </th>
+                            <th>
+                                Allocated
+                            </th>
+                            <th>
+                                Spent
+                            </th>
+                            <th>
+                                Remaining
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.Allocations) {
+                            <tr>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Category.Name)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.AllocationAmount)
+                                </td>
+                                <td>
+                                    @* @Html.DisplayFor(modelItem => item.) *@
+                                </td>
+                                <td>
+                                    @* @Html.DisplayFor(modelItem => item.) *@
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
 </div>
+
+
+
+
+    @* <h1 class="display-4">Welcome</h1>
+    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p> *@
+@* </div> *@

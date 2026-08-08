@@ -55,18 +55,7 @@ namespace CST8256_BudgetTracker.Controllers
                     Text = "-- All Months --"
                 });
 
-            // Search by month and year
-            // if (searchYear.HasValue && searchMonth.HasValue)
-            // {
-            //     allocationsContext = allocationsContext.Where(t => 
-            //     t.AllocationMonth.Month == searchMonth.Value &&
-            //     t.AllocationMonth.Year == searchYear.Value);
-            // }
-
             // Parse selected month and year.
-            // int? searchYear;
-            // int? searchMonth;
-
             if (!string.IsNullOrEmpty(SelectedAllocationMonth))
             {
                 var parts = SelectedAllocationMonth.Split('-');
@@ -219,6 +208,7 @@ namespace CST8256_BudgetTracker.Controllers
         public async Task<IActionResult> Edit(int? id)
         {
             ViewBag.MonthErrorMessage = "";
+            ViewBag.IsCurrentMonth = true;
 
             if (id == null)
             {
@@ -231,24 +221,26 @@ namespace CST8256_BudgetTracker.Controllers
                 return NotFound();
             }
 
-            if (allocation.AllocationMonth == new DateOnly(DateTime.Today.Year, DateTime.Today.Month, 1))
+            // The purpose of the code within the curly braces is to have prepopulated values.
+            var model = new AllocationCreateViewModel {
+                Id = allocation.Id,
+                Amount = allocation.AllocationAmount,
+                CategoryId = allocation.CategoryId,
+                CategoryOptions = GetCategoriesOptions()
+            };
+
+            // Only show Edit form if allocation is from current month.
+            if (!(allocation.AllocationMonth == new DateOnly(DateTime.Today.Year, DateTime.Today.Month, 1)))
             {
-                // The purpose of the code within the curly braces is to have prepopulated values.
-                var model = new AllocationCreateViewModel {
-                    Id = allocation.Id,
-                    Amount = allocation.AllocationAmount,
-                    CategoryId = allocation.CategoryId,
-                    CategoryOptions = GetCategoriesOptions()
-                };
-                return View(model);
-            } else {
+                ViewBag.IsCurrentMonth = false;
                 ViewBag.MonthErrorMessage = "Cannot edit allocations from previous months.";
             }
-            
-            return View();
 
-            // ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Id", allocation.CategoryId);
-            // return View(allocation);
+            return View(model);
+            // return RedirectToAction("Index");
+
+            ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Id", allocation.CategoryId);
+            return View(allocation);
         }
 
         // POST: Allocations/Edit/5
@@ -303,23 +295,23 @@ namespace CST8256_BudgetTracker.Controllers
         }
 
         // GET: Allocations/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
+        // public async Task<IActionResult> Delete(int? id)
+        // {
+        //     if (id == null)
+        //     {
+        //         return NotFound();
+        //     }
 
-            var allocation = await _context.Allocations
-                .Include(a => a.Category)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (allocation == null)
-            {
-                return NotFound();
-            }
+        //     var allocation = await _context.Allocations
+        //         .Include(a => a.Category)
+        //         .FirstOrDefaultAsync(m => m.Id == id);
+        //     if (allocation == null)
+        //     {
+        //         return NotFound();
+        //     }
 
-            return View(allocation);
-        }
+        //     return View(allocation);
+        // }
 
         // POST: Allocations/Delete/5
         [HttpPost, ActionName("Delete")]
@@ -329,7 +321,12 @@ namespace CST8256_BudgetTracker.Controllers
             var allocation = await _context.Allocations.FindAsync(id);
             if (allocation != null)
             {
-                _context.Allocations.Remove(allocation);
+
+                // Only delete if allocation is from current month.
+                if (allocation.AllocationMonth == new DateOnly(DateTime.Today.Year, DateTime.Today.Month, 1))
+                {
+                    _context.Allocations.Remove(allocation);
+                }
             }
 
             await _context.SaveChangesAsync();
