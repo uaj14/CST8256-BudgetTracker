@@ -17,7 +17,7 @@ public class HomeController : Controller
     }
     public async Task<IActionResult> Index(string? SelectedMonth)
     {
-        // Month selected
+        // 0. Month selected
         var allocationsContext = _context.Allocations.Include(a => a.Category).AsQueryable();
 
         // Prompted ChatGPT to create DDL items for available months from the DB
@@ -62,7 +62,7 @@ public class HomeController : Controller
         ViewBag.searchYear = searchYear;
         ViewBag.searchMonth = searchMonth;
 
-        // Total income this month
+        // 1. Total income this month
         ViewBag.SelectedMonthIncome = await _context.Transactions
             .Include(t => t.Category)
             .Where(t =>
@@ -71,7 +71,7 @@ public class HomeController : Controller
                 t.Category.Name == "Income")
             .SumAsync(t => t.Amount);
 
-        // Total expenses this month
+        // 2. Total expenses this month
         ViewBag.SelectedMonthExpense = await _context.Transactions
             .Include(t => t.Category)
             .Where(t =>
@@ -80,7 +80,68 @@ public class HomeController : Controller
                 t.Category.Name != "Income")
             .SumAsync(t => t.Amount);
 
-        // Recent 5 transactions of a given month
+        // 3. Remaining allocations
+        // SQL to LINQ query converted with ChatGPT.
+        var remainingAllocationsModel = await _context.Allocations
+        .Where(a =>
+            a.AllocationMonth.Year == searchYear &&
+            a.AllocationMonth.Month == searchMonth)
+        .Join(
+            _context.Transactions,
+            a => new
+            {
+                a.CategoryId,
+                Year = a.AllocationMonth.Year,
+                Month = a.AllocationMonth.Month
+            },
+            t => new
+            {
+                t.CategoryId,
+                Year = t.TransactionDate.Year,
+                Month = t.TransactionDate.Month
+            },
+            (a, t) => new
+            {
+                Allocation = a,
+                Transaction = t
+            }
+        )
+        .Join(
+            _context.Categories,
+            x => x.Allocation.CategoryId,
+            c => c.Id,
+            (x, c) => new
+            {
+                CategoryId = x.Allocation.CategoryId,
+                CategoryName = c.Name,
+                AllocationAmount = x.Allocation.AllocationAmount,
+                TransactionAmount = x.Transaction.Amount
+            }
+        )
+        .GroupBy(x => new
+        {
+            x.CategoryId,
+            x.CategoryName,
+            x.AllocationAmount
+        })
+        .Select(g => new DashboardRemainingAllocationsViewModel
+        {
+            CategoryName = g.Key.CategoryName,
+            Allocated = g.Key.AllocationAmount,
+            Spent = g.Sum(x => x.TransactionAmount),
+            Remaining = g.Key.AllocationAmount - g.Sum(x => x.TransactionAmount)
+        })
+        .ToListAsync();
+
+        // var remainingAllocationsModel = new DashboardRemainingAllocationsViewModel
+        // {
+        //     CategoryName = 
+        //     Allocated = t.TransactionDate,
+        //     Spent = 
+        //     Remaining = 
+        // }
+
+        // 4. Recent 5 transactions of a given month
         var model = new DashboardViewModel
         {
             Allocations = _context.Allocations
@@ -96,10 +157,9 @@ public class HomeController : Controller
                 .OrderByDescending(t => t.TransactionDate)
                 .Take(5)
                 .ToList(),
-            AllocationVM = allocationsModel
+            AllocationVM = allocationsModel,
+            RemainingAllocationsVM = remainingAllocationsModel
         };
-
-        // Remaining allocations
 
         return View(model);
     }

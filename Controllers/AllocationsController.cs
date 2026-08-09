@@ -63,6 +63,7 @@ namespace CST8256_BudgetTracker.Controllers
                 int searchYear = int.Parse(parts[0]);
                 int searchMonth = int.Parse(parts[1]);
 
+                // Select only allocations from the selected month.
                 allocationsContext = allocationsContext
                     .Where(a =>
                         a.AllocationMonth.Year == searchYear &&

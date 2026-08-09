@@ -93,19 +93,20 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var item in Model.Allocations) {
+                        @foreach (var item in Model.RemainingAllocationsVM) {
+                            
                             <tr>
                                 <td>
-                                    @Html.DisplayFor(modelItem => item.Category.Name)
+                                    @Html.DisplayFor(modelItem => item.CategoryName)
                                 </td>
                                 <td>
-                                    @Html.DisplayFor(modelItem => item.AllocationAmount)
+                                    @Html.DisplayFor(modelItem => item.Allocated)
                                 </td>
                                 <td>
-                                    @* @Html.DisplayFor(modelItem => item.) *@
+                                    @Html.DisplayFor(modelItem => item.Spent)
                                 </td>
                                 <td>
-                                    @* @Html.DisplayFor(modelItem => item.) *@
+                                    @Html.DisplayFor(modelItem => item.Remaining)
                                 </td>
                             </tr>
                         }
