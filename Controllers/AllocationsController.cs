@@ -70,9 +70,6 @@ namespace CST8256_BudgetTracker.Controllers
                         a.AllocationMonth.Month == searchMonth);
             }
 
-            // ViewBag.Year = searchYear;
-            // ViewBag.Month = searchMonth;
-
             ViewBag.AllocationAmount_sort = sort == "AllocationAmount" ? "AllocationAmount_desc" : "AllocationAmount";
             ViewBag.AllocationMonth_sort = sort == "AllocationMonth" ? "AllocationMonth_desc" : "AllocationMonth";
             ViewBag.CreatedAt_sort = sort == "CreatedAt" ? "CreatedAt_desc" : "CreatedAt";
@@ -119,35 +116,12 @@ namespace CST8256_BudgetTracker.Controllers
             }
 
             allocationsModel.Allocations = await allocationsContext.ToListAsync();
-            // return View(await allocationsContext.ToListAsync());
             return View(allocationsModel);
         }
-
-        // GET: Allocations/Details/5
-        // public async Task<IActionResult> Details(int? id)
-        // {
-        //     if (id == null)
-        //     {
-        //         return NotFound();
-        //     }
-
-        //     var allocation = await _context.Allocations
-        //         .Include(a => a.Category)
-        //         .FirstOrDefaultAsync(m => m.Id == id);
-        //     if (allocation == null)
-        //     {
-        //         return NotFound();
-        //     }
-
-        //     return View(allocation);
-        // }
 
         // GET: Allocations/Create
         public IActionResult Create()
         {
-            // ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Id");
-            // return View();
-            // The purpose of the code within the curly braces is to have prepopulated values.
             var model = new AllocationCreateViewModel {
                 CategoryOptions = GetCategoriesOptions()
             };
@@ -160,18 +134,8 @@ namespace CST8256_BudgetTracker.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        // public async Task<IActionResult> Create([Bind("Id,AllocationAmount,AllocationMonth,CreatedAt,UpdatedAt,CategoryId")] Allocation allocation)
         public async Task<IActionResult> Create(AllocationCreateViewModel model)
         {
-            // if (ModelState.IsValid)
-            // {
-            //     _context.Add(allocation);
-            //     await _context.SaveChangesAsync();
-            //     return RedirectToAction(nameof(Index));
-            // }
-            // ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Id", allocation.CategoryId);
-            // return View(allocation);
-
             ViewBag.ErrorMessage = "";
 
             // Create new allocation iff there is no existing allocation for the current month.
@@ -238,10 +202,6 @@ namespace CST8256_BudgetTracker.Controllers
             }
 
             return View(model);
-            // return RedirectToAction("Index");
-
-            ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Id", allocation.CategoryId);
-            return View(allocation);
         }
 
         // POST: Allocations/Edit/5
@@ -249,7 +209,6 @@ namespace CST8256_BudgetTracker.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        // public async Task<IActionResult> Edit(int id, [Bind("Id,AllocationAmount,AllocationMonth,CreatedAt,UpdatedAt,CategoryId")] Allocation allocation)
         public async Task<IActionResult> Edit(int id, AllocationCreateViewModel model)
         {
             if (id != model.Id)
@@ -257,7 +216,7 @@ namespace CST8256_BudgetTracker.Controllers
                 return NotFound();
             }
 
-            // AI: Process of updating an existing transaction
+            // Used AI to process the update for an existing transaction
             // Load entity from database
             var allocation = await _context.Allocations.FindAsync(id);
 

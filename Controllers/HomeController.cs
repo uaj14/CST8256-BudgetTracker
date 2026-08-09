@@ -38,6 +38,7 @@ public class HomeController : Controller
                 Text = new DateTime(x.Year, x.Month, 1)
                     .ToString("MMMM yyyy")
             })
+            .Take(6)
             .ToList();
 
         // Parse selected month and year.

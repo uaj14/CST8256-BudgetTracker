@@ -25,25 +25,13 @@
     <thead>
         <tr>
             <th>
-                @* <a asp-route-sort="AllocationAmount">@Html.DisplayNameFor(model => model.AllocationAmount)</a> *@
-                @* <a asp-route-sort="@ViewBag.AllocationAmount_sort">@Html.DisplayNameFor(model => model.Allocations.AllocationAmount)</a> *@
-                <a asp-route-sort="@ViewBag.AllocationAmount_sort">Allocation Amount</a>
-            </th>
-            <th>
-                @* <a asp-route-sort="@ViewBag.AllocationMonth_sort">@Html.DisplayNameFor(model => model.AllocationMonth)</a> *@
                 <a asp-route-sort="@ViewBag.AllocationMonth_sort">Allocation Month</a>
             </th>
             <th>
-                @* <a asp-route-sort="@ViewBag.CreatedAt_sort">@Html.DisplayNameFor(model => model.CreatedAt)</a> *@
-                <a asp-route-sort="@ViewBag.CreatedAt_sort">Created At</a>
-            </th>
-            <th>
-                @* <a asp-route-sort="@ViewBag.UpdatedAt_sort">@Html.DisplayNameFor(model => model.UpdatedAt)</a> *@
-                <a asp-route-sort="@ViewBag.UpdatedAt_sort">Updated At</a>
-            </th>
-            <th>
-                @* @Html.DisplayNameFor(model => model.Category) *@
                 Category
+            </th>
+            <th>
+                <a asp-route-sort="@ViewBag.AllocationAmount_sort">Allocation Amount</a>
             </th>
             <th></th>
         </tr>
@@ -52,19 +40,13 @@
 @foreach (var item in Model.Allocations) {
         <tr>
             <td>
-                @Html.DisplayFor(modelItem => item.AllocationAmount)
-            </td>
-            <td>
                 @Html.DisplayFor(modelItem => item.AllocationMonth)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.CreatedAt)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.UpdatedAt)
-            </td>
-            <td>
                 @Html.DisplayFor(modelItem => item.Category.Name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.AllocationAmount)
             </td>
             <td class="d-flex">
                 @if (item.AllocationMonth == new DateOnly(DateTime.Today.Year, DateTime.Today.Month, 1)) {

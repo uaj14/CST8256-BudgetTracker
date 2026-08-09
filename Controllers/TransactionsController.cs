@@ -37,7 +37,6 @@ namespace CST8256_BudgetTracker.Controllers
                 .AsQueryable();
 
             // Search by Description and Category
-            // var budgetTrackerContext = _context.Transactions.Include(t => t.Category).AsQueryable();
             if (!string.IsNullOrEmpty(search))
             {
                 budgetTrackerModel = budgetTrackerModel.Where(t =>
@@ -47,7 +46,6 @@ namespace CST8256_BudgetTracker.Controllers
             }
 
             // Sort
-            // var budgetTrackerContext = _context.Transactions.Include(t => t.Category);
             ViewBag.Current_sort = sort;
             ViewBag.Date_sort = sort == "Date" ? "Date_desc" : "Date";
             ViewBag.Description_sort = sort == "Description" ? "Description_desc" : "Description";
@@ -114,9 +112,7 @@ namespace CST8256_BudgetTracker.Controllers
             ViewBag.HasPrevPage = pageNumber > 1;
             ViewBag.HasNextPage = pageNumber < totalPages;
 
-
             return View(budgetTrackerModel);
-            //return View(await budgetTrackerContext.ToListAsync());
         }
 
         // GET: Transactions/Details/5
@@ -158,7 +154,6 @@ namespace CST8256_BudgetTracker.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        // public async Task<IActionResult> Create([Bind("Id,Amount,TransactionDate,TransactionType,CreatedAt,UpdatedAt,CategoryId,Description")] Transaction transaction)
         public async Task<IActionResult> Create(TransactionCreateViewModel model)
         {
             if (ModelState.IsValid)
@@ -204,7 +199,6 @@ namespace CST8256_BudgetTracker.Controllers
             {
                 return NotFound();
             }
-            // ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Id", transaction.CategoryId);
             
             // The purpose of the code within the curly braces is to have prepopulated values.
             var model = new TransactionCreateViewModel {
@@ -219,7 +213,6 @@ namespace CST8256_BudgetTracker.Controllers
             };
             
             return View(model);
-            return View(transaction);
         }
 
         // POST: Transactions/Edit/5
@@ -269,8 +262,6 @@ namespace CST8256_BudgetTracker.Controllers
             model.TransactionTypeOptions = GetTransactionTypesOptions();
             model.CategoryOptions = GetCategoriesOptions();
             return View(model);
-            //ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Id", transaction.CategoryId);
-            //return View(transaction);
         }
 
         // GET: Transactions/Delete/5
